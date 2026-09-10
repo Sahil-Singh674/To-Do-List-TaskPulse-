@@ -1,0 +1,1683 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TaskPulse - Modern Task & Habit Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ==========================================================================
+   TaskPulse - Modern To-Do List Application Styles
+   ========================================================================== */
+
+    :root {
+      /* Typography */
+      --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+      /* Priority Colors */
+      --priority-low: #10b981;
+      --priority-low-bg: rgba(16, 185, 129, 0.12);
+      --priority-medium: #f59e0b;
+      --priority-medium-bg: rgba(245, 158, 11, 0.12);
+      --priority-high: #ef4444;
+      --priority-high-bg: rgba(239, 68, 68, 0.14);
+
+      /* Shared Accents */
+      --primary-accent: #6366f1;
+      --primary-hover: #4f46e5;
+      --primary-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+      --accent-glow: rgba(99, 102, 241, 0.25);
+      --danger-color: #ef4444;
+      --danger-hover: #dc2626;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+      --transition-fast: 0.15s ease;
+      --transition-normal: 0.25s ease;
+    }
+
+    /* 🌙 Dark Theme (Default) */
+    [data-theme="dark"] {
+      --bg-body: #0b0f19;
+      --bg-surface: #111827;
+      --bg-surface-elevated: #1f2937;
+      --bg-input: #1e293b;
+      --bg-hover: #2d3748;
+
+      --text-main: #f9fafb;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --border-focus: #818cf8;
+
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+
+      --ring-bg: #1e293b;
+      --ring-stroke: #6366f1;
+    }
+
+    /* ☀️ Light Theme */
+    [data-theme="light"] {
+      --bg-body: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-surface-elevated: #f1f5f9;
+      --bg-input: #f8fafc;
+      --bg-hover: #e2e8f0;
+
+      --text-main: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #94a3b8;
+
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+      --border-focus: #6366f1;
+
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.1);
+
+      --ring-bg: #e2e8f0;
+      --ring-stroke: #4f46e5;
+    }
+
+    /* Global Reset */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background-color: var(--bg-body);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.5;
+      transition: background-color var(--transition-normal), color var(--transition-normal);
+      position: relative;
+      overflow-x: hidden;
+      padding: 20px 16px 40px;
+    }
+
+    /* Canvas Confetti */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Main Container */
+    .app-container {
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ==========================================================================
+   Header & Brand
+   ========================================================================== */
+    .app-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .logo-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--primary-gradient);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.25rem;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+
+    .logo-text h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .logo-text h1 span {
+      color: var(--primary-accent);
+    }
+
+    .header-date {
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+    }
+
+    .icon-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all var(--transition-fast);
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .icon-btn.small {
+      width: 32px;
+      height: 32px;
+      font-size: 0.9rem;
+    }
+
+    /* Dropdown Menu */
+    .dropdown-wrapper {
+      position: relative;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      min-width: 210px;
+      padding: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      opacity: 0;
+      transform: translateY(-8px);
+      pointer-events: none;
+      transition: opacity var(--transition-fast), transform var(--transition-fast);
+      z-index: 100;
+    }
+
+    .dropdown-menu.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .dropdown-menu button,
+    .dropdown-file-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius-sm);
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.88rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background var(--transition-fast);
+      width: 100%;
+    }
+
+    .dropdown-menu button:hover,
+    .dropdown-file-label:hover {
+      background: var(--bg-hover);
+    }
+
+    .dropdown-menu .danger-action {
+      color: var(--danger-color);
+    }
+
+    .dropdown-menu .danger-action:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .dropdown-divider {
+      height: 1px;
+      background: var(--border-subtle);
+      margin: 4px 0;
+    }
+
+    /* ==========================================================================
+   Productivity Stats Overview
+   ========================================================================== */
+    .stats-overview {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: var(--shadow-sm);
+      transition: transform var(--transition-fast), border-color var(--transition-fast);
+    }
+
+    .stat-card:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-2px);
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .icon-pending {
+      background: rgba(99, 102, 241, 0.12);
+      color: #818cf8;
+    }
+
+    .icon-completed {
+      background: rgba(16, 185, 129, 0.12);
+      color: #10b981;
+    }
+
+    .icon-overdue {
+      background: rgba(239, 68, 68, 0.12);
+      color: #ef4444;
+    }
+
+    .stat-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    .stat-info h3 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    /* Progress Ring */
+    .progress-card {
+      padding: 10px 16px;
+    }
+
+    .progress-ring-container {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .progress-ring {
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      width: 60px;
+      height: 60px;
+    }
+
+    .progress-ring-bg {
+      stroke: var(--ring-bg);
+      fill: transparent;
+    }
+
+    .progress-ring-bar {
+      stroke: var(--ring-stroke);
+      fill: transparent;
+      stroke-dasharray: 175.92;
+      stroke-dashoffset: 175.92;
+      stroke-linecap: round;
+      transition: stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .progress-percent {
+      position: absolute;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+   Create Task Form
+   ========================================================================== */
+    .create-task-section {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .main-input-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .input-with-icon {
+      flex: 1;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-icon {
+      position: absolute;
+      left: 16px;
+      color: var(--text-muted);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .input-with-icon input {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 13px 16px 13px 44px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .input-with-icon input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    /* Buttons */
+    .primary-btn {
+      background: var(--primary-gradient);
+      color: #ffffff;
+      border: none;
+      border-radius: var(--radius-md);
+      padding: 13px 20px;
+      font-family: inherit;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: opacity var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .primary-btn:hover {
+      opacity: 0.95;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px var(--accent-glow);
+    }
+
+    .secondary-btn {
+      background: var(--bg-surface-elevated);
+      color: var(--text-main);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 10px 16px;
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all var(--transition-fast);
+    }
+
+    .secondary-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-strong);
+    }
+
+    .small-btn {
+      padding: 8px 14px;
+      font-size: 0.82rem;
+    }
+
+    .text-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 0;
+      transition: color var(--transition-fast);
+    }
+
+    .text-btn:hover {
+      color: var(--primary-accent);
+    }
+
+    .form-details-toggle {
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+    }
+
+    .toggle-arrow {
+      font-size: 0.75rem;
+      transition: transform var(--transition-normal);
+    }
+
+    .form-details-toggle.expanded .toggle-arrow {
+      transform: rotate(180deg);
+    }
+
+    /* Form Details Expandable Area */
+    .form-details {
+      overflow: hidden;
+      max-height: 500px;
+      opacity: 1;
+      transition: max-height var(--transition-normal), opacity var(--transition-normal), margin var(--transition-normal);
+      margin-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      border-top: 1px solid var(--border-subtle);
+      padding-top: 14px;
+    }
+
+    .form-details.collapsed {
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+      pointer-events: none;
+    }
+
+    .details-row {
+      display: flex;
+      gap: 12px;
+    }
+
+    .three-cols {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .flex-1 {
+      flex: 1;
+    }
+
+    .form-group label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 9px 12px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color var(--transition-fast);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--border-focus);
+    }
+
+    /* Subtasks Creation Area */
+    .subtasks-creation-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .subtasks-creation-container label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .subtask-input-wrapper {
+      display: flex;
+      gap: 8px;
+    }
+
+    .subtask-input-wrapper input {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 8px 12px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .subtask-input-wrapper input:focus {
+      border-color: var(--border-focus);
+    }
+
+    .draft-subtasks-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 140px;
+      overflow-y: auto;
+    }
+
+    .draft-subtask-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-surface-elevated);
+      padding: 6px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.85rem;
+    }
+
+    .draft-subtask-item .remove-draft-subtask {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 2px 6px;
+      font-size: 0.85rem;
+      transition: color var(--transition-fast);
+    }
+
+    .draft-subtask-item .remove-draft-subtask:hover {
+      color: var(--danger-color);
+    }
+
+    /* ==========================================================================
+   Controls Section: Search, Filters, Sorting
+   ========================================================================== */
+    .controls-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .search-box {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 14px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 11px 36px 11px 40px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    }
+
+    .search-box input:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .clear-search-btn {
+      position: absolute;
+      right: 12px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      font-size: 0.85rem;
+    }
+
+    .clear-search-btn:hover {
+      color: var(--text-main);
+    }
+
+    .filter-sort-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .filter-tabs {
+      display: flex;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 4px;
+      gap: 4px;
+    }
+
+    .filter-tab {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .filter-tab:hover {
+      color: var(--text-main);
+    }
+
+    .filter-tab.active {
+      background: var(--primary-accent);
+      color: #ffffff;
+      box-shadow: 0 2px 8px var(--accent-glow);
+    }
+
+    .secondary-filters {
+      display: flex;
+      gap: 8px;
+    }
+
+    .select-wrapper select {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 500;
+      padding: 7px 12px;
+      border-radius: var(--radius-md);
+      outline: none;
+      cursor: pointer;
+      transition: border-color var(--transition-fast);
+    }
+
+    .select-wrapper select:focus {
+      border-color: var(--border-focus);
+      color: var(--text-main);
+    }
+
+    /* ==========================================================================
+   Task List & Cards
+   ========================================================================== */
+    .task-list-main {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .task-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 4px;
+    }
+
+    .task-list-header h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+    }
+
+    .badge {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+    }
+
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Individual Task Card */
+    .task-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-fast);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .task-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 4px;
+      background: transparent;
+      transition: background var(--transition-fast);
+    }
+
+    .task-card.priority-high::before {
+      background: var(--priority-high);
+    }
+
+    .task-card.priority-medium::before {
+      background: var(--priority-medium);
+    }
+
+    .task-card.priority-low::before {
+      background: var(--priority-low);
+    }
+
+    .task-card:hover {
+      border-color: var(--border-strong);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+
+    /* Completed Card State */
+    .task-card.completed {
+      opacity: 0.65;
+      background: var(--bg-surface-elevated);
+    }
+
+    .task-card.completed .task-card-title {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    /* Card Header: Checkbox + Title + Actions */
+    .task-card-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    /* Custom Animated Checkbox */
+    .checkbox-container {
+      display: block;
+      position: relative;
+      cursor: pointer;
+      font-size: 20px;
+      user-select: none;
+      width: 22px;
+      height: 22px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+
+    .checkbox-container input {
+      position: absolute;
+      opacity: 0;
+      cursor: pointer;
+      height: 0;
+      width: 0;
+    }
+
+    .checkmark {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 22px;
+      width: 22px;
+      background-color: var(--bg-input);
+      border: 2px solid var(--border-strong);
+      border-radius: 6px;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .checkbox-container:hover input~.checkmark {
+      border-color: var(--primary-accent);
+    }
+
+    .checkbox-container input:checked~.checkmark {
+      background-color: #10b981;
+      border-color: #10b981;
+    }
+
+    .checkmark:after {
+      content: "";
+      position: absolute;
+      display: none;
+      width: 5px;
+      height: 10px;
+      border: solid white;
+      border-width: 0 2.5px 2.5px 0;
+      transform: rotate(45deg);
+      margin-bottom: 2px;
+    }
+
+    .checkbox-container input:checked~.checkmark:after {
+      display: block;
+    }
+
+    /* Task Title & Content */
+    .task-card-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .task-card-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      word-break: break-word;
+      transition: color var(--transition-fast);
+    }
+
+    .task-card-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      word-break: break-word;
+      white-space: pre-line;
+    }
+
+    /* Task Card Actions (Edit, Delete) */
+    .task-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.8;
+      transition: opacity var(--transition-fast);
+    }
+
+    .task-card:hover .task-card-actions {
+      opacity: 1;
+    }
+
+    .action-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.88rem;
+      transition: all var(--transition-fast);
+    }
+
+    .action-btn:hover {
+      background: var(--bg-hover);
+      color: var(--text-main);
+    }
+
+    .action-btn.delete-btn:hover {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--danger-color);
+    }
+
+    /* Task Meta Tags (Priority, Category, Due date) */
+    .task-card-meta {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.78rem;
+      margin-left: 34px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+    }
+
+    .tag-priority-high {
+      background: var(--priority-high-bg);
+      color: var(--priority-high);
+    }
+
+    .tag-priority-medium {
+      background: var(--priority-medium-bg);
+      color: var(--priority-medium);
+    }
+
+    .tag-priority-low {
+      background: var(--priority-low-bg);
+      color: var(--priority-low);
+    }
+
+    .tag-category {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .tag-due {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .tag-due.due-overdue {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: var(--priority-high);
+    }
+
+    .tag-due.due-today {
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: var(--priority-medium);
+    }
+
+    /* Subtasks inside Task Card */
+    .task-subtasks-wrapper {
+      margin-left: 34px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background: var(--bg-surface-elevated);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .subtasks-progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .subtasks-bar-bg {
+      height: 5px;
+      background: var(--bg-input);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+
+    .subtasks-bar-fill {
+      height: 100%;
+      background: var(--primary-accent);
+      border-radius: var(--radius-full);
+      transition: width 0.3s ease;
+    }
+
+    .subtasks-items-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .subtask-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      cursor: pointer;
+    }
+
+    .subtask-item.completed span {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .subtask-checkbox {
+      cursor: pointer;
+      accent-color: var(--primary-accent);
+    }
+
+    /* Empty State */
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px;
+      text-align: center;
+      background: var(--bg-surface);
+      border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-lg);
+      gap: 8px;
+    }
+
+    .empty-icon {
+      font-size: 2.5rem;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .empty-state h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .empty-state p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      max-width: 320px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* ==========================================================================
+   Edit Task Modal
+   ========================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 540px;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalScaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalScaleUp {
+      from {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .modal-header h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-form {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    /* ==========================================================================
+   Toasts
+   ========================================================================== */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      z-index: 2000;
+    }
+
+    .toast {
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-strong);
+      color: var(--text-main);
+      padding: 12px 18px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-md);
+      font-size: 0.88rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      animation: toastSlideIn 0.25s ease-out;
+    }
+
+    @keyframes toastSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .toast-undo-btn {
+      background: none;
+      border: none;
+      color: var(--primary-accent);
+      font-family: inherit;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 0 4px;
+    }
+
+    /* ==========================================================================
+   Footer
+   ========================================================================== */
+    .app-footer {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 16px 0;
+    }
+
+    /* ==========================================================================
+   Responsive Breakpoints
+   ========================================================================== */
+    @media (max-width: 680px) {
+      .stats-overview {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .progress-card {
+        grid-column: span 2;
+      }
+
+      .three-cols {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-sort-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .filter-tabs {
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .secondary-filters {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .secondary-filters .select-wrapper select {
+        width: 100%;
+      }
+
+      .task-card-meta {
+        margin-left: 0;
+      }
+
+      .task-subtasks-wrapper {
+        margin-left: 0;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Canvas for Confetti -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- Top Navigation / Header -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo">
+          <div class="logo-icon">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div class="logo-text">
+            <h1>Task<span>Pulse</span></h1>
+            <p id="current-date" class="header-date">Today</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- Sound Effect Toggle -->
+        <button id="toggle-sound-btn" class="icon-btn" title="Toggle Sound Feedback">
+          <i class="fa-solid fa-volume-high"></i>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button id="toggle-theme-btn" class="icon-btn" title="Toggle Dark/Light Mode">
+          <i class="fa-solid fa-sun"></i>
+        </button>
+
+        <!-- Data Options Dropdown Trigger -->
+        <div class="dropdown-wrapper">
+          <button id="data-menu-btn" class="icon-btn" title="Backup & Restore">
+            <i class="fa-solid fa-gear"></i>
+          </button>
+          <div id="data-menu" class="dropdown-menu">
+            <button id="export-json-btn">
+              <i class="fa-solid fa-file-arrow-down"></i> Export Tasks (JSON)
+            </button>
+            <label for="import-json-input" class="dropdown-file-label">
+              <i class="fa-solid fa-file-arrow-up"></i> Import Tasks (JSON)
+              <input type="file" id="import-json-input" accept=".json" style="display: none;">
+            </label>
+            <div class="dropdown-divider"></div>
+            <button id="clear-all-btn" class="danger-action">
+              <i class="fa-solid fa-trash-can"></i> Clear All Tasks
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Productivity Overview Stats -->
+    <section class="stats-overview">
+      <div class="stat-card progress-card">
+        <div class="progress-ring-container">
+          <svg class="progress-ring" width="70" height="70">
+            <circle class="progress-ring-bg" stroke-width="6" cx="35" cy="35" r="28"></circle>
+            <circle id="progress-circle" class="progress-ring-bar" stroke-width="6" cx="35" cy="35" r="28"></circle>
+          </svg>
+          <div id="progress-text" class="progress-percent">0%</div>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Productivity</span>
+          <h3 id="progress-ratio">0 / 0 Done</h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-pending">
+          <i class="fa-solid fa-clock"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Pending</span>
+          <h3 id="stat-pending">0</h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-completed">
+          <i class="fa-solid fa-circle-check"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Completed</span>
+          <h3 id="stat-completed">0</h3>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon icon-overdue">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-label">Overdue</span>
+          <h3 id="stat-overdue">0</h3>
+        </div>
+      </div>
+    </section>
+
+    <!-- Task Creation Section -->
+    <section class="create-task-section">
+      <form id="task-form" class="task-form">
+        <div class="main-input-row">
+          <div class="input-with-icon">
+            <i class="fa-solid fa-plus input-icon"></i>
+            <input type="text" id="task-title" placeholder="What do you need to accomplish? (Press Enter to add)"
+              required autocomplete="off">
+          </div>
+          <button type="submit" id="add-task-btn" class="primary-btn">
+            <span>Add Task</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <!-- Collapsible task metadata inputs -->
+        <div class="form-details-toggle">
+          <button type="button" id="toggle-details-btn" class="text-btn">
+            <i class="fa-solid fa-sliders"></i>
+            <span id="details-btn-text">Add Details (Due date, priority, category)</span>
+            <i class="fa-solid fa-chevron-down toggle-arrow"></i>
+          </button>
+        </div>
+
+        <div id="form-details" class="form-details collapsed">
+          <div class="details-row">
+            <div class="form-group flex-1">
+              <label for="task-desc"><i class="fa-regular fa-file-lines"></i> Description / Notes</label>
+              <textarea id="task-desc" placeholder="Add additional notes, context, or links..." rows="2"></textarea>
+            </div>
+          </div>
+
+          <div class="details-row three-cols">
+            <div class="form-group">
+              <label for="task-category"><i class="fa-solid fa-tag"></i> Category</label>
+              <select id="task-category">
+                <option value="General">📌 General</option>
+                <option value="Work">💼 Work</option>
+                <option value="Personal">👤 Personal</option>
+                <option value="Study">📚 Study</option>
+                <option value="Health">🏃 Health</option>
+                <option value="Finance">💰 Finance</option>
+                <option value="Shopping">🛒 Shopping</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="task-priority"><i class="fa-solid fa-flag"></i> Priority</label>
+              <select id="task-priority">
+                <option value="low">🟢 Low</option>
+                <option value="medium" selected>🟡 Medium</option>
+                <option value="high">🔴 High</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="task-due"><i class="fa-regular fa-calendar-days"></i> Due Date</label>
+              <input type="datetime-local" id="task-due">
+            </div>
+          </div>
+
+          <!-- Subtasks Creation Area -->
+          <div class="subtasks-creation-container">
+            <label><i class="fa-solid fa-list-check"></i> Subtasks / Checklist</label>
+            <div class="subtask-input-wrapper">
+              <input type="text" id="new-subtask-input" placeholder="Add a checklist item and click Add..."
+                autocomplete="off">
+              <button type="button" id="add-subtask-btn" class="secondary-btn small-btn">
+                <i class="fa-solid fa-plus"></i> Add
+              </button>
+            </div>
+            <ul id="draft-subtasks-list" class="draft-subtasks-list"></ul>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Controls: Search, Filters, Sort -->
+    <section class="controls-section">
+      <!-- Search Input -->
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="search-input" placeholder="Search tasks... (Press '/' to focus)" autocomplete="off">
+        <button id="clear-search-btn" class="clear-search-btn hidden">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Filters & Sorting -->
+      <div class="filter-sort-bar">
+        <!-- Status Filter Tabs -->
+        <div class="filter-tabs" role="tablist">
+          <button class="filter-tab active" data-filter="all">All</button>
+          <button class="filter-tab" data-filter="today">Today</button>
+          <button class="filter-tab" data-filter="pending">Pending</button>
+          <button class="filter-tab" data-filter="overdue">Overdue</button>
+          <button class="filter-tab" data-filter="completed">Completed</button>
+        </div>
+
+        <div class="secondary-filters">
+          <!-- Category Filter -->
+          <div class="select-wrapper">
+            <select id="filter-category" title="Filter by Category">
+              <option value="all">All Categories</option>
+              <option value="General">📌 General</option>
+              <option value="Work">💼 Work</option>
+              <option value="Personal">👤 Personal</option>
+              <option value="Study">📚 Study</option>
+              <option value="Health">🏃 Health</option>
+              <option value="Finance">💰 Finance</option>
+              <option value="Shopping">🛒 Shopping</option>
+            </select>
+          </div>
+
+          <!-- Sort Select -->
+          <div class="select-wrapper">
+            <select id="sort-tasks" title="Sort Tasks">
+              <option value="created-desc">Newest First</option>
+              <option value="created-asc">Oldest First</option>
+              <option value="due-asc">Due Date (Earliest)</option>
+              <option value="priority-desc">Priority (High to Low)</option>
+              <option value="alphabetical">Alphabetical (A-Z)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Task List Main Area -->
+    <main class="task-list-main">
+      <div class="task-list-header">
+        <h2 id="current-view-title">All Tasks</h2>
+        <span id="task-count-badge" class="badge">0 tasks</span>
+      </div>
+
+      <!-- Empty State -->
+      <div id="empty-state" class="empty-state hidden">
+        <div class="empty-icon">
+          <i class="fa-solid fa-clipboard-check"></i>
+        </div>
+        <h3 id="empty-state-title">No tasks found</h3>
+        <p id="empty-state-desc">You're all caught up! Add a new task above to get started.</p>
+      </div>
+
+      <!-- Task Cards Container -->
+      <div id="task-list" class="task-list"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>TaskPulse &bull; Built with HTML5, CSS3 & JavaScript &bull; Auto-saved to your browser</p>
+    </footer>
+  </div>
+
+  <!-- Edit Task Modal -->
+  <div id="edit-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-pen-to-square"></i> Edit Task</h3>
+        <button id="close-modal-btn" class="icon-btn small"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form id="edit-task-form" class="modal-form">
+        <input type="hidden" id="edit-task-id">
+
+        <div class="form-group">
+          <label for="edit-task-title">Task Title</label>
+          <input type="text" id="edit-task-title" required autocomplete="off">
+        </div>
+
+        <div class="form-group">
+          <label for="edit-task-desc">Description</label>
+          <textarea id="edit-task-desc" rows="3"></textarea>
+        </div>
+
+        <div class="details-row three-cols">
+          <div class="form-group">
+            <label for="edit-task-category">Category</label>
+            <select id="edit-task-category">
+              <option value="General">📌 General</option>
+              <option value="Work">💼 Work</option>
+              <option value="Personal">👤 Personal</option>
+              <option value="Study">📚 Study</option>
+              <option value="Health">🏃 Health</option>
+              <option value="Finance">💰 Finance</option>
+              <option value="Shopping">🛒 Shopping</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-task-priority">Priority</label>
+            <select id="edit-task-priority">
+              <option value="low">🟢 Low</option>
+              <option value="medium">🟡 Medium</option>
+              <option value="high">🔴 High</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-task-due">Due Date</label>
+            <input type="datetime-local" id="edit-task-due">
+          </div>
+        </div>
+
+        <!-- Edit Subtasks -->
+        <div class="subtasks-creation-container">
+          <label><i class="fa-solid fa-list-check"></i> Subtasks</label>
+          <div class="subtask-input-wrapper">
+            <input type="text" id="edit-subtask-input" placeholder="Add a new checklist item...">
+            <button type="button" id="edit-add-subtask-btn" class="secondary-btn small-btn">
+              <i class="fa-solid fa-plus"></i> Add
+            </button>
+          </div>
+          <ul id="edit-subtasks-list" class="draft-subtasks-list"></ul>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" id="cancel-edit-btn" class="secondary-btn">Cancel</button>
+          <button type="submit" class="primary-btn">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
